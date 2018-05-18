@@ -1,0 +1,14 @@
+Hi, {{ user.username }}
+An alarm raised for the next situation.
+Details:
+{% if device %}Device: {{ device.name }} | Connected: {{ device.connected }}{% endif %}
+{% if var %}Var: {{ var.var_type }} | Value: {{ var.value }}{% endif %}
+{% if content_type %}
+{% for content in content_type %}
+content
+{% endfor %}
+{% endif %}
+Alarm: {{ alarm.name }}
+Description: {{ alarm.description }}
+Date: {{ event.created }}
+Automatic message. Don't reply

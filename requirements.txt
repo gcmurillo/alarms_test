@@ -1,0 +1,7 @@
+django<1.12
+djangorestframework<3.7
+django-filter
+django-crispy-forms
+django-cors-headers
+django-guardian
+django-gm2m

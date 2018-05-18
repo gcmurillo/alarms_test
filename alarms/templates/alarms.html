@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block alarms %}
+    {{ n_active_alarms }}
+{% endblock alarms %}
+
+{% block notifications %}
+    {{ notifications }}
+{% endblock notifications %}
+
+{% block notifications_sidenav %}
+    <md-content>
+      <md-list flex>
+        <md-subheader class="md-no-sticky">Notifications</md-subheader>
+        <md-list-item class="md-3-line" ng-repeat="item in {{ data }}" ng-click="null">
+          <div class="md-list-item-text" layout="column">
+            {% verbatim %}
+              <h3>Notificacion:  {{ item.id }}</h3>
+            <h4>Tipo de evento: {{ item.event.alarm_type }}</h4>
+            <p>creado el: {{ item.created }}</p>
+              <p>Status: {{ item.status }}</p>
+              {% endverbatim %}
+          </div>
+            <md-divider ng-if="!$last"></md-divider>
+        </md-list-item>
+      </md-list>
+    </md-content>
+{% endblock %}
+
+{% block active_alarms %}
+    <md-content>
+      <md-list flex>
+        <md-subheader class="md-no-sticky">Notifications</md-subheader>
+        <md-list-item class="md-3-line" ng-repeat="item in {{ data_alarms }}" ng-click="null">
+          <div class="md-list-item-text" layout="column">
+            {% verbatim %}
+              <h3>Alarma:  {{ item.id }}</h3>
+            <h4>Tipo de evento: {{ item.alarm_type }}</h4>
+            <p>creado el: {{ item.created }}</p>
+              <p>Device: {{ item.device }}</p>
+              <p>Variable: {{ item.variables }}</p>
+              <p>Description: {{ item.description }}</p>
+              {% endverbatim %}
+          </div>
+            <md-divider ng-if="!$last"></md-divider>
+        </md-list-item>
+      </md-list>
+    </md-content>
+{% endblock %}
+
+{% block content %}
+
+{% endblock content %}

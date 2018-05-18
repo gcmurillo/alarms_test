@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Events {{ alarm_type }}</title>
+</head>
+<body>
+    <h2>AlarmEvents Tipo: {{ alarm_type }}</h2>
+        {% for alarma in alarms %}
+        <li>{{ alarma.alarm_type }} - {{ alarma.pk }}</li>
+        {% empty %}
+        <p>Sin alarmas de ese tipo</p>
+        {% endfor %}
+</body>
+</html>

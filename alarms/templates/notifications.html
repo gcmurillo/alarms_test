@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notifications</title>
+</head>
+<body>
+    <h2>Notificaciones de: {{ user }}</h2>
+        <ul>
+            <li>Tipo | Fecha | User | Estado</li>
+            {% for nots in notifications %}
+            <li>{{ nots.event.alarm_type }} | {{ nots.event.created }} | {{ nots.user.username }} | {% if nots.checked %} Chequeado {% else %} No chequeado {% endif %}</li>
+            {% empty %}
+            <p>Sin notificaciones</p>
+            {% endfor %}
+        </ul>
+</body>
+</html>

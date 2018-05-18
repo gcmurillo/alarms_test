@@ -1,0 +1,127 @@
+<html lang = "en">
+{% load static %}
+   <head>
+      <link rel = "stylesheet" href = "https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.css">
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-animate.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-aria.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular-messages.min.js"></script>
+      <script src = "https://ajax.googleapis.com/ajax/libs/angular_material/1.0.0/angular-material.min.js"></script>
+      <script src = "{% static 'js/app.js' %}"></script>
+   </head>
+
+   <body ng-app = "MyApp" ng-cloak ng-controller = "side_bar">
+      <div>
+        <md-toolbar class="md-hue-2">
+            <div class="md-toolbar-tools">
+
+              <md-button class="md-icon-button" aria-label="Menu" ng-click="toggleMenu()">
+                <md-icon md-svg-icon="{% static 'img/icons/ic_menu_white_24px.svg' %}"></md-icon>
+              </md-button>
+
+              <h2 flex md-truncate>{% verbatim %}{{ title }}{% endverbatim %}</h2>
+
+                <md-button class="md-fab" aria-label="Alarms" ng-click="toggleAlarms()">
+                    {% block alarms %}{% endblock alarms %}
+                    <md-icon md-svg-src="{% static 'img/icons/ic_warning_white_24px.svg' %}"></md-icon>
+                </md-button>
+
+                <md-button class="md-fab" aria-label="Notifications" ng-click="toggleNotifications()">
+                    {% block notifications %}{% endblock notifications %}
+                    <md-icon md-svg-src="{% static 'img/icons/ic_sms_failed_white_24px.svg' %}"></md-icon>
+                </md-button>
+
+
+
+              <md-button class="md-icon-button" aria-label="More">
+                <md-icon md-svg-icon="img/icons/more_vert.svg"></md-icon>
+              </md-button>
+            </div>
+          </md-toolbar>
+          {% block content %}{% endblock content %}
+      </div>
+
+        <!-- Sidenav de alarmas activas -->
+        <md-sidenav class="md-sidenav-right" md-component-id="alarms"
+                md-disable-backdrop md-whiteframe="4">
+
+              <md-toolbar class="md-theme-indigo">
+                <h1 class="md-toolbar-tools">Alarmas Activas</h1>
+              </md-toolbar>
+
+              <md-content layout-margin>
+                <p>
+                  Aqui se muestran las alarmas activas
+                </p>
+                  {% block active_alarms %}{% endblock %}
+                <md-button ng-click="toggleAlarms()" class="md-accent">
+                  CLOSE
+                </md-button>
+              </md-content>
+
+        </md-sidenav>
+
+        <!-- Sidenav de notificaciones -->
+        <md-sidenav class="md-sidenav-right" md-component-id="notifications"
+                md-disable-backdrop md-whiteframe="4">
+
+              <md-toolbar class="md-theme-indigo">
+                <h1 class="md-toolbar-tools">Notificaciones</h1>
+              </md-toolbar>
+
+              <md-content layout-margin>
+                <p>
+                  Aqui se muestran todas las notificaciones
+                </p>
+                  {% block notifications_sidenav %}{% endblock %}
+                <md-button ng-click="toggleNotifications()" class="md-accent">
+                  CLOSE
+                </md-button>
+              </md-content>
+
+        </md-sidenav>
+
+        <!-- Sidenav menu lateral -->
+        <md-sidenav class="md-sidenav-left" md-component-id="lateral_menu"
+                md-disable-backdrop md-whiteframe="4">
+
+                  <md-toolbar class="md-theme-indigo">
+                    <h1 class="md-toolbar-tools">API endpoints</h1>
+                  </md-toolbar>
+                    <a href="{% url 'alarms_list' %}" target="_blank">
+                    <md-list-item class="secondary-button-padding" ng-click="null">
+                        <p>Alarms</p>
+                        </md-list-item>
+                        </a>
+                      <md-divider ng-if="!$last"></md-divider>
+                  </md-list-item>
+                    <a href="{% url 'events_list' %}" target="_blank">
+                    <md-list-item class="secondary-button-padding" ng-click="null">
+                        <p>Events</p>
+                        </md-list-item>
+                        </a>
+                      <md-divider ng-if="!$last"></md-divider>
+                  </md-list-item>
+                    <a href="{% url 'notifications_list' %}" target="_blank">
+                    <md-list-item class="secondary-button-padding" ng-click="null">
+                        <p>Notifications</p>
+                        </md-list-item>
+                        </a>
+                      <md-divider ng-if="!$last"></md-divider>
+                  </md-list-item>
+                    <a href="{% url 'subscriptions_list' %}" target="_blank">
+                    <md-list-item class="secondary-button-padding" ng-click="null">
+                        <p>Subscriptions</p>
+                        </md-list-item>
+                        </a>
+                      <md-divider ng-if="!$last"></md-divider>
+                  </md-list-item>
+                <md-button ng-click="toggleMenu()" class="md-accent">
+                  CLOSE
+                </md-button>
+              </md-content>
+
+        </md-sidenav>
+
+   </body>
+</html>

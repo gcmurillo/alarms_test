@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Subscriptions</title>
+</head>
+<body>
+    <h2>Subscripciones de: {{ user }}</h2>
+        {% for sub in subs %}
+        <li>{{ sub.alarm.name }} - User: {{ sub.user.username }}</li>
+        {% empty %}
+        <p>Sin subscripciones</p>
+        {% endfor %}
+</body>
+</html>
