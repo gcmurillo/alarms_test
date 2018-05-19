@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'api_alarms'
+project = 'alarms'
 copyright = '2018, Geancarlo Murillo'
 author = 'Geancarlo Murillo'
 
@@ -130,7 +130,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'api_alarms.tex', 'api_alarms Documentation',
+    (master_doc, 'alarms.tex', 'alarms Documentation',
      'Geancarlo Murillo', 'manual'),
 ]
 
@@ -140,7 +140,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'api_alarms', 'api_alarms Documentation',
+    (master_doc, 'alarms', 'alarms Documentation',
      [author], 1)
 ]
 
@@ -151,8 +151,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'api_alarms', 'api_alarms Documentation',
-     author, 'api_alarms', 'One line description of project.',
+    (master_doc, 'alarms', 'alarms Documentation',
+     author, 'alarms', 'One line description of project.',
      'Miscellaneous'),
 ]
 

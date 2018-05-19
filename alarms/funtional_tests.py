@@ -20,18 +20,18 @@ class FuntionalTest(unittest.TestCase):
         assert 'Log in' in self.browser.page_source
 
     def test_alarms_api_page(self):
-        ''' Get access to api_alarms API'''
+        ''' Get access to alarms API'''
 
-        self.browser.get('http://localhost:8000/api/api_alarms')
+        self.browser.get('http://localhost:8000/api/alarms')
         assert 'HTTP 200 OK' in self.browser.page_source
 
     def test_refuse_events_api_page(self):
         ''' Refuse access to events API, because user is not logged '''
-        self.browser.get('http://localhost:8000/api/api_alarms/events/')
+        self.browser.get('http://localhost:8000/api/alarms/events/')
         self.assertNotIn('HTTP 200 OK', self.browser.page_source)
 
     def test_refuse_notifications_api_page(self):
-        self.browser.get('http://localhost:8000/api/api_alarms/notifications/')
+        self.browser.get('http://localhost:8000/api/alarms/notifications/')
         self.assertNotIn('HTTP 200 OK', self.browser.page_source)
 
     def test_admin_login(self):

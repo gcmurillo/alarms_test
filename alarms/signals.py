@@ -27,7 +27,7 @@ def notifications_n_email_after_event_creation(sender, instance, **kwargs):
     """
     alarm = instance.alarm  # Alarm which generated the event
 
-    subscriptions = Subscription.objects.filter(alarm=alarm)  # Getting the subscriptions associated with api_alarms
+    subscriptions = Subscription.objects.filter(alarm=alarm)  # Getting the subscriptions associated with alarms
     sub_serializer = SubscriptionSerializer(subscriptions, many=True)
     send = []   # list of emails which the mail was send
     notificated = []  # list with users notificated
@@ -191,8 +191,9 @@ def create_event_for_alarm_formula_by_device_update(sender, instance, **kwargs):
     Create event by formula field in alarm referenced by updated device
     :param sender: Device
     """
-    alarms = Alarm.objects.filter(monitor__devices=instance, monitor__active=True) # Get the api_alarms reference by monitors list
-    vars = instance.var_set.values('value', 'slug', 'var_type')
+    alarms = Alarm.objects.filter(monitor__devices=instance, monitor__active=True) # Get the alarms reference by monitors list
+    #vars = instance.vars.values('value', 'slug', 'var_type')
+    vars = Var.objects.filter(device=instance).values('value', 'slug', 'var_type')
     context = {
         'vars': {var_item['var_type']: var_item for var_item in vars},
         'device': instance
@@ -248,10 +249,9 @@ def create_event_for_alarm_formula_looking_vars_for_monitor_lookups_field(sender
         if monitor.lookups:
             try:
                 vars_query = eval('Var.objects.filter(%s)' % monitor.lookups)
-            except:
+            except Exception as e:
                 vars_query = []
-                print('Error executing lookup in ' + monitor.__str__() + '.')
-                pass
+                print("Error executing lookup %s in monitor %s. Details: %s" % (monitor.lookups, monitor, e))
 
             if instance in vars_query:
                 monitors.append(monitor)
@@ -305,7 +305,7 @@ def create_event_for_alarm_formula_looking_var_for_monitor_var_selection(sender,
     """
     Create an event if var instance satisfy the condition in formula field of an alarm
     """
-    # Only for api_alarms with monitors with selected variables in select box, and no with lookups
+    # Only for alarms with monitors with selected variables in select box, and no with lookups
     alarms = Alarm.objects.filter(monitor__variables=instance, monitor__active=True, monitor__lookups="")
     context = {
         'vars': {instance.slug: {'slug': instance.slug, 'var_type': instance.var_type, 'value': instance.value,

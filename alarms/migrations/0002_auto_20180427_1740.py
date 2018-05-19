@@ -6,12 +6,12 @@ from django.db import migrations
 
 
 def create_monitor_and_alarms(apps, schema_monitor):
-    ''' Create Monitor and Alarms with information about all the api_alarms in the system '''
+    ''' Create Monitor and Alarms with information about all the alarms in the system '''
 
     Monitor = apps.get_model('alarms', 'Monitor')
     Alarm = apps.get_model('alarms', 'Alarm')
 
-    monitor = Monitor.objects.create(lookups="Q(slug__startswith='api_alarms') & Q(device__profile__name='Feeder')", duration=0)
+    monitor = Monitor.objects.create(lookups="Q(slug__startswith='alarms') & Q(device__profile__name='Feeder')", duration=0)
 
     alarm = Alarm.objects.create(name='Shield Incompatible', slug='shield-incompatible', formula='{{ var.value | bit:1 }}',
                          description='Cuando el equipo detecta que algun shield no es compatible con el software o hardware')
@@ -95,6 +95,7 @@ def create_monitor_and_alarms(apps, schema_monitor):
     alarm = Alarm.objects.create(name='Alimentación Máxima', slug='alimentacion-maxima', formula='{{ var.value | bit:31 }}',
                          description='Cuando se supera alimentación máxima diaria definida por el usuario')
     alarm.monitor.add(monitor)
+
 
 def remove_monitor_and_alarms(apps, schema_monitor):
     Monitor = apps.get_model('alarms', 'Monitor')

@@ -21,10 +21,7 @@ FEEDER = 'FE'
 AIRADOR = 'AR'
 REPETIDORA = 'RP'
 PROFILES = (
-    (ALIMENTADOR, 'Alimentador'),
-    (AIRADOR, 'Airador'),
-    (REPETIDORA, 'Repetidora'),
-    (FEEDER, 'Feeder')
+    (FEEDER, 'Feeder'),
 )
 
 

@@ -13,7 +13,6 @@ from guardian.shortcuts import assign_perm
 
 Device = apps.get_model(settings.DEVICE_MODEL)
 Var = apps.get_model(settings.VAR_MODEL)
-Profile = apps.get_model(settings.PROFILE_MODEL)
 
 
 client = Client()
@@ -85,13 +84,13 @@ class AlarmsAPITest(APITestCase):
 
         alarm = Alarm.objects.get(pk=1)
         serializer = AlarmSerializer(alarm)
-        response = self.client.get('/api/api_alarms/1/')
+        response = self.client.get('/api/alarms/1/')
         self.assertEqual(serializer.data, response.data)
 
     def test_failure_get_alarm(self):
         ''' Failure getting an alarm by incorrect pk '''
 
-        response = self.client.get('/api/api_alarms/100/')
+        response = self.client.get('/api/alarms/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_put_should_update_alarm(self):
@@ -101,7 +100,7 @@ class AlarmsAPITest(APITestCase):
             "name": "prueba PUT",
             "formula": "print('Esto es una prueba')"
         }
-        response = self.client.put('/api/api_alarms/1/', data)
+        response = self.client.put('/api/alarms/1/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_put_bad_request_alarm(self):
@@ -111,7 +110,7 @@ class AlarmsAPITest(APITestCase):
             "name": "prueba PUT",
             "creator": "print('Esto es una prueba')"
         }
-        response = self.client.put('/api/api_alarms/1/', data)
+        response = self.client.put('/api/alarms/1/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_failure_put_alarm(self):
@@ -121,17 +120,17 @@ class AlarmsAPITest(APITestCase):
             "name": "prueba PUT",
             "formula": "print('Esto es una prueba')"
         }
-        response = self.client.put('/api/api_alarms/100/', data)
+        response = self.client.put('/api/alarms/100/', data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_alarm(self):
         ''' Delete an Alarm '''
-        response = self.client.delete('/api/api_alarms/1/')
+        response = self.client.delete('/api/alarms/1/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_failure_delete_alarm(self):
         ''' Delete a not existing alarm '''
-        response = self.client.delete('/api/api_alarms/100/')
+        response = self.client.delete('/api/alarms/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -150,7 +149,7 @@ class EventsAPITest(APITestCase):
         assign_perm('can_subscribe', self.user, self.alarm)
         Subscription.objects.create(active=True, user=self.user, alarm=self.alarm, email=True)
         url = reverse('events_list')
-        self.event = AlarmEvent.objects.create(alarm_type='US', created="2018-03-05T19:52:22Z", finished="2018-05-17T06:00:00Z",
+        self.event = AlarmEvent.objects.create(alarm_type='US', created="2018-03-05T19:52:22Z", finished="2075-05-17T06:00:00Z",
                                   description='description', alarm=self.alarm)
 
     def test_get_single_event(self):
@@ -159,31 +158,31 @@ class EventsAPITest(APITestCase):
         self.client.login(username='user', password='abcd')
         event = AlarmEvent.objects.get(pk=1)
         serializer = AlarmEventSerializer(event)
-        response = self.client.get('/api/api_alarms/events/1/')
+        response = self.client.get('/api/alarms/events/1/')
         self.assertEqual(response.data, serializer.data)
 
     def test_finished_filter_no_selected(self):
         ''' Test finished filter for AlarmEvent no selected'''
         self.client.login(username='user', password='abcd')
-        response = self.client.get('/api/api_alarms/events/?finished=1')
+        response = self.client.get('/api/alarms/events/?finished=1')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_finished_filter_true(self):
         ''' Test finished filter for AlarmEvent select True'''
         self.client.login(username='user', password='abcd')
-        response = self.client.get('/api/api_alarms/events/?finished=3')
+        response = self.client.get('/api/alarms/events/?finished=3')
         self.assertEqual(len(response.data), 1)
 
     def test_finished_filter_false(self):
         ''' Test finished filter for AlarmEvent select False '''
         self.client.login(username='user', password='abcd')
-        response = self.client.get('/api/api_alarms/events/?finished=2')
+        response = self.client.get('/api/alarms/events/?finished=2')
         self.assertEqual(len(response.data), 0)
 
     def test_finished_filter_bad_url(self):
         ''' Test finished filter for AlarmEvent select False '''
         self.client.login(username='user', password='abcd')
-        response = self.client.get('/api/api_alarms/events/?finished=something')
+        response = self.client.get('/api/alarms/events/?finished=something')
         self.assertEqual(len(response.data), 1)
 
     def test_create_event(self):
@@ -232,13 +231,13 @@ class EventsAPITest(APITestCase):
 
     def test_failure_get_event(self):
         ''' Failure getting a not existing event '''
-        response = self.client.get('/api/api_alarms/events/100/')
+        response = self.client.get('/api/alarms/events/100/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_failure_get_event_no_permissions(self):
         ''' Failure get event, because user not logged or not subscribed to the alarm '''
         self.client.login(username='user_prueba', password='1234')
-        response = self.client.get('/api/api_alarms/events/1/')
+        response = self.client.get('/api/alarms/events/1/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_get_object_with_content_type_data(self):
@@ -246,16 +245,16 @@ class EventsAPITest(APITestCase):
         #todo: check
         self.client.login(username='user', password='abcd')
         self.event.content_type = [self.monitor, self.alarm]
-        response = self.client.get('api/api_alarms/events/1/')
+        response = self.client.get('api/alarms/events/1/')
 
     def test_delete_event(self):
         ''' Delete an Event '''
-        response = self.client.delete('/api/api_alarms/events/1/')
+        response = self.client.delete('/api/alarms/events/1/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_failure_delete_event(self):
         ''' Failing delete a not existng event '''
-        response = self.client.delete('api/api_alarms/events/2020/')
+        response = self.client.delete('api/alarms/events/2020/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -354,12 +353,12 @@ class SubscriptionsAPITest(APITestCase):
 
         sub = Subscription.objects.get(pk=1)
         serializer = SubscriptionSerializer(sub)
-        response = self.client.get('/api/api_alarms/subscriptions/1/')
+        response = self.client.get('/api/alarms/subscriptions/1/')
         self.assertEqual(response.data, serializer.data)
 
     def test_failure_get_subscription(self):
         ''' Failing get a not existing subscription '''
-        response = self.client.get('/api/api_alarms/subscriptions/2020/')
+        response = self.client.get('/api/alarms/subscriptions/2020/')
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
     def test_failure_put_should_update_subscription(self):
@@ -370,7 +369,7 @@ class SubscriptionsAPITest(APITestCase):
             "staff_template": "Alarma activada"
         }
         try:
-            response = self.client.put('/api/api_alarms/subscriptions/1/', data)
+            response = self.client.put('/api/alarms/subscriptions/1/', data)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         except Exception as e:
             error = ValidationError(["User don't have permissions to subscribe to this alarm"])
@@ -384,7 +383,7 @@ class SubscriptionsAPITest(APITestCase):
             "staff_template": "Alarma activada",
             "active": True
         }
-        response = self.client.put('/api/api_alarms/subscriptions/1/', data)
+        response = self.client.put('/api/alarms/subscriptions/1/', data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_put_changing_active_status_subscription(self):
@@ -398,7 +397,7 @@ class SubscriptionsAPITest(APITestCase):
             "staff_template": "Alarma activada",
             "active": True
         }
-        response = self.client.put('/api/api_alarms/subscriptions/1/', data)
+        response = self.client.put('/api/alarms/subscriptions/1/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_put_changing_subscription(self):
@@ -411,7 +410,7 @@ class SubscriptionsAPITest(APITestCase):
             "alarm": 1,
             "staff_template": "staff_template",
         }
-        response = self.client.put('/api/api_alarms/subscriptions/1/', data)
+        response = self.client.put('/api/alarms/subscriptions/1/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_put_bad_request_subscription(self):
@@ -424,18 +423,18 @@ class SubscriptionsAPITest(APITestCase):
             "staff_template": "Alarma activada",
             "active": ":D",
         }
-        response = self.client.put('/api/api_alarms/subscriptions/1/', data)
+        response = self.client.put('/api/alarms/subscriptions/1/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_delete_subscription_user_without_can_delete_perm(self):
         ''' Failing delete subscription for user without can delete permission '''
 
-        response = self.client.delete('/api/api_alarms/subscriptions/1/')
+        response = self.client.delete('/api/alarms/subscriptions/1/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_delete_no_existing_subscription(self):
         ''' Try delete no existing subscription '''
-        response = self.client.delete('/api/api_alarms/subscriptions/1556/')
+        response = self.client.delete('/api/alarms/subscriptions/1556/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_individual_subscription_for_group_subscription(self):
@@ -452,7 +451,7 @@ class SubscriptionsAPITest(APITestCase):
         assign_perm('can_subscribe', group, alarm)
         self.client.post(url, data) # create grupal subscription
         # Subscription 1 existed and user1 owned it. Where the group subscription is created, it is deleted
-        response = self.client.get('api/api_alarms/subscriptions/1/')
+        response = self.client.get('api/alarms/subscriptions/1/')
         self.assertEqual(status.HTTP_404_NOT_FOUND, response.status_code)
 
 
@@ -513,14 +512,14 @@ class NotificationsAPITest(APITestCase):
 
         notification = Notification.objects.get(pk=1)
         serializer = NotificationSerializer(notification)
-        response = self.client.get('/api/api_alarms/notifications/1/')
+        response = self.client.get('/api/alarms/notifications/1/')
         self.assertEqual(response.data, serializer.data)
 
     def test_failure_get_notification(self):
         ''' Failure get a notification with the incorrect user or not logged user '''
 
         self.client.logout()
-        response = self.client.get('/api/api_alarms/notifications/1/')
+        response = self.client.get('/api/alarms/notifications/1/')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_put_should_update_notification_user_own_notification(self):
@@ -529,7 +528,7 @@ class NotificationsAPITest(APITestCase):
         data = {
             "status": "checked"
         }
-        response = self.client.put('/api/api_alarms/notifications/1/', data)
+        response = self.client.put('/api/alarms/notifications/1/', data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_put_should_not_update_notification_user_doesnt_own_notification(self):
@@ -539,7 +538,7 @@ class NotificationsAPITest(APITestCase):
             "status": "checked"
         }
         self.client.login(username='prueba', password='1234')
-        response = self.client.put('/api/api_alarms/notifications/1/', data)
+        response = self.client.put('/api/alarms/notifications/1/', data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_put_should_not_update_notification_incorrect_information(self):
@@ -547,7 +546,7 @@ class NotificationsAPITest(APITestCase):
         data = {
             "user": 1
         }
-        response = self.client.put('/api/api_alarms/notifications/1/', data)
+        response = self.client.put('/api/alarms/notifications/1/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_put_bad_request(self):
@@ -555,7 +554,7 @@ class NotificationsAPITest(APITestCase):
         data = {
             "user": 'dasdr'
         }
-        response = self.client.put('/api/api_alarms/notifications/1/', data)
+        response = self.client.put('/api/alarms/notifications/1/', data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_failure_put_information_not_existing_notification(self):
@@ -563,19 +562,19 @@ class NotificationsAPITest(APITestCase):
         data = {
             "status": "checked"
         }
-        response = self.client.put('/api/api_alarms/notifications/2020/', data)
+        response = self.client.put('/api/alarms/notifications/2020/', data)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_delete_notification(self):
         ''' Delete a Notification '''
 
-        response = self.client.delete('/api/api_alarms/notifications/1/')
+        response = self.client.delete('/api/alarms/notifications/1/')
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_failure_delete_notification(self):
         ''' Failing delete a not existing notification '''
 
-        response = self.client.delete('/api/api_alarms/notifications/2200/')
+        response = self.client.delete('/api/alarms/notifications/2200/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create_notification_n_email_in_event_creation(self):
@@ -619,7 +618,7 @@ class NotificationsAPITest(APITestCase):
         self.assertEqual(1, Notification.objects.all().count())
 
     def test_get_no_existing_notification(self):
-        response = self.client.get('/api/api_alarms/notifications/2200/')
+        response = self.client.get('/api/alarms/notifications/2200/')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
 
@@ -690,13 +689,12 @@ class SubscriptionTest(TestCase):
     def test_delete_individual_subscription_with_permissions(self):
         ''' Delete subscription with a staff user '''
         self.client.login(username='gcmurillo', password='abcd')
-        response = self.client.delete('/api/api_alarms/subscriptions/1/')
+        response = self.client.delete('/api/alarms/subscriptions/1/')
         self.assertEqual(status.HTTP_204_NO_CONTENT, response.status_code)
 
     def test_failing_create_event_for_alarm_formula_by_device_update(self):
         ''' Failing create an event because incorrect formula '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True)
         monitor.devices.add(device)
@@ -744,8 +742,7 @@ class SubscriptionTest(TestCase):
 
     def test_failing_create_event_for_var_validation_by_formula_field(self):
         ''' Failing create an event, because formula is incorrect '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='device1', connected=True)
         var1 = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='device2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -781,8 +778,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_by_device_update(self):
         ''' Create an event if formula field of alarm return True, for device post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True)
         monitor.devices.add(device)
@@ -800,8 +796,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_by_device_update_multiple_devices_in_formula(self):
         ''' Create an event if formula field of alarm return True, for device post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         Var.objects.create(var_type='voltaje', name='voltaje', value=15, device=device, slug='voltaje')
         monitor = Monitor.objects.create(duration=10, active=True)
@@ -822,8 +817,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_by_device_update_condition_false(self):
         ''' Create an event if formula field of alarm return True, for device post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         Var.objects.create(var_type='food', name='food', value=20, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True)
         monitor.devices.add(device)
@@ -842,8 +836,7 @@ class NotificationsTest(TestCase):
 
     def test_failure_create_event_for_alarm_formula_looking_vars_for_monitor_lookups_field(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -862,8 +855,7 @@ class NotificationsTest(TestCase):
 
     def test_failure_create_event_for_alarm_formula_looking_vars_for_monitor_lookups_field_bad_formula(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -882,8 +874,7 @@ class NotificationsTest(TestCase):
 
     def test_failure_create_event_for_alarm_formula_looking_vars_for_monitor_lookups_alarm_duration_pass(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -903,8 +894,7 @@ class NotificationsTest(TestCase):
 
     def test_send_email_with_staff_template(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -923,8 +913,7 @@ class NotificationsTest(TestCase):
 
     def test_send_email_with_user_template(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -944,8 +933,7 @@ class NotificationsTest(TestCase):
 
     def test_send_email_with_staff_template_text(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -965,8 +953,7 @@ class NotificationsTest(TestCase):
 
     def test_send_email_with_user_template_text(self):
         ''' Failing create event, for a bad redacting lookup '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -987,8 +974,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_looking_vars_for_monitor_lookups_field(self):
         ''' Create events, if formula evaluation return true for vars got via lookups field evaluation '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1007,8 +993,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_by_var_update_focus_var_type(self):
         ''' Create an event if formula field alarm return true, looking for all same var type '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='device1', connected=True)
         var1 = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='device2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1027,8 +1012,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_for_alarm_formula_by_var_update(self):
         ''' Create an event if formula field alarm return true, for var post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True)
         monitor.devices.add(device)
@@ -1045,8 +1029,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_monitor_var_selection(self):
         ''' Create an event if formula field alarm return true, for var post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True, lookups="")
         monitor.variables.add(var)
@@ -1063,8 +1046,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_monitor_var_selection_with_preview_event(self):
         ''' Create an event if formula field alarm return true, for var post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True, lookups="")
         monitor.variables.add(var)
@@ -1082,8 +1064,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_monitor_var_selection_with_bad_formula(self):
         ''' Create an event if formula field alarm return true, for var post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True, lookups="")
         monitor.variables.add(var)
@@ -1100,8 +1081,7 @@ class NotificationsTest(TestCase):
 
     def test_create_event_monitor_var_selection_with_condition_false(self):
         ''' Create an event if formula field alarm return true, for var post_save signal '''
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
+        device = Device.objects.create(serial='0001', name='device1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=20, device=device, slug='food')
         monitor = Monitor.objects.create(duration=10, active=True, lookups="")
         monitor.variables.add(var)
@@ -1118,8 +1098,7 @@ class NotificationsTest(TestCase):
 
 
     def test_mail_for_group_staff_template(self):
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1141,8 +1120,7 @@ class NotificationsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_mail_for_group_staff_template_text(self):
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1164,8 +1142,7 @@ class NotificationsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_mail_for_group_user_template(self):
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1188,8 +1165,7 @@ class NotificationsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_mail_for_group_user_template_text(self):
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True, profile=profile)
+        device1 = Device.objects.create(serial='0001', name='Airador1', connected=True)
         var = Var.objects.create(var_type='food', name='food', value=0, device=device1, slug='food')
         device2 = Device.objects.create(serial='0002', name='Airador2', connected=True)
         Var.objects.create(var_type='food', name='food', value=25, device=device2, slug='food')
@@ -1364,7 +1340,7 @@ class NotificationsTest(TestCase):
 class AlarmsTest(TestCase):
 
     def setUp(self):
-        monitor = Monitor.objects.create(lookups="Q(slug__startswith='api_alarms') & Q(device__profile__name='Feeder')",
+        monitor = Monitor.objects.create(lookups="Q(slug__startswith='alarms')",
                                          duration=0, active=True)
 
         alarm = Alarm.objects.create(name='Shield Incompatible', formula='{{ var.value | bit:1 }}',
@@ -1450,9 +1426,8 @@ class AlarmsTest(TestCase):
                                      description='Cuando se supera alimentación máxima diaria definida por el usuario')
         alarm.monitor.add(monitor)
 
-        profile = Profile.objects.create(profile_type='FE', name='Feeder', slug='feeder')
-        self.device = Device.objects.create(serial='0001', name='device1', connected=True, profile=profile)
-        alarm_var = Var.objects.create(var_type='api_alarms', name='api_alarms', value=0, device=self.device, slug='api_alarms')
+        self.device = Device.objects.create(serial='0001', name='device1', connected=True)
+        alarm_var = Var.objects.create(var_type='alarms', name='alarms', value=0, device=self.device, slug='alarms')
 
     def test_shield_incompatible_alarm(self): # -> 2 bits
         ''' Shield incompatible alarm is activate and create a new AlarmEvent '''
@@ -1727,8 +1702,8 @@ class AlarmsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_alarm_combination_1(self):
-        ''' Test combination of api_alarms: Firmware con Errores (5) and Shield Incompatible (1) '''
-        # 34 is 100010 in binary, the api_alarms selected are (5) and (1)
+        ''' Test combination of alarms: Firmware con Errores (5) and Shield Incompatible (1) '''
+        # 34 is 100010 in binary, the alarms selected are (5) and (1)
         n_events_before = AlarmEvent.objects.all().count()
         alarm_var = Var.objects.get(pk=1)
         alarm_var.value = 34
@@ -1742,8 +1717,8 @@ class AlarmsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_alarm_combination_2(self):
-        ''' Test combination of api_alarms: Bateria Baja (15) and Hidrofono Desconectado (14) '''
-        # 49152 is 1100000000000000 in binary, the api_alarms selected are (15) and (14)
+        ''' Test combination of alarms: Bateria Baja (15) and Hidrofono Desconectado (14) '''
+        # 49152 is 1100000000000000 in binary, the alarms selected are (15) and (14)
         n_events_before = AlarmEvent.objects.all().count()
         alarm_var = Var.objects.get(pk=1)
         alarm_var.value = 49152
@@ -1757,9 +1732,9 @@ class AlarmsTest(TestCase):
         self.assertNotEquals(n_events_after, n_events_before)
 
     def test_alarm_combination_3(self):
-        ''' Test combination of api_alarms: Equipo Iniciado (2), Alimentacion Deshabilitada (7),
+        ''' Test combination of alarms: Equipo Iniciado (2), Alimentacion Deshabilitada (7),
             Asperson Obstruido (9) and Sensor 2 Alto (20) '''
-        # 10492220 is 100000000001010000100 in binary, the api_alarms selected are (15) and (14)
+        # 10492220 is 100000000001010000100 in binary, the alarms selected are (15) and (14)
         n_events_before = AlarmEvent.objects.all().count()
         alarm_var = Var.objects.get(pk=1)
         alarm_var.value = 1049220
